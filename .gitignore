@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+out/
+*.npy
+.DS_Store
+TR__1*.MDN

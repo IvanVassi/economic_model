@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Сложная народнохозяйственная модель — Управление народным хозяйством</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--bg:#f4f4f0;--panel:#fff;--ink:#1c1c1c;--muted:#6b6b66;--line:#d9d9d2;--acc:#1f5fbf;--acc2:#b8392e;--grid:#ececе6;
+ --c1:#1f5fbf;--c2:#b8392e;--c3:#2e8b57;--c4:#c98a00;--c5:#7b3fa0;--c6:#0e8a8a;--c7:#8b5a2b;--c8:#555}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.35 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);display:grid;grid-template-columns:270px 1fr;grid-template-rows:52px 1fr;height:100vh}
+header{grid-column:1/3;display:flex;align-items:center;gap:12px;padding:0 14px;background:#22262e;color:#fff}
+header h1{font-size:15px;font-weight:600;margin:0 10px 0 0;white-space:nowrap}
+header .t{font-variant-numeric:tabular-nums;background:#111;padding:4px 10px;border-radius:4px;min-width:130px;text-align:center}
+header button{background:#3a4150;color:#fff;border:0;border-radius:4px;padding:6px 10px;cursor:pointer;font-size:13px}
+header button:hover{background:#4b5468}
+header button.danger{background:#7a2a22}
+header .status{margin-left:auto;color:#bbb;font-size:12px}
+nav{overflow:auto;border-right:1px solid var(--line);background:#fafaf7;padding:8px 0}
+nav .grp{padding:10px 12px 4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+nav a{display:block;padding:5px 12px 5px 14px;color:var(--ink);text-decoration:none;font-size:13px;border-left:3px solid transparent}
+nav a:hover{background:#eeeee8}
+nav a.active{border-left-color:var(--acc);background:#e6ecf7;font-weight:600}
+nav a .n{display:inline-block;width:26px;color:var(--muted);font-variant-numeric:tabular-nums}
+nav a .p{float:right;color:var(--acc2);font-size:11px}
+main{overflow:auto;padding:14px 18px}
+main h2{margin:0 0 10px;font-size:17px;font-weight:600}
+.board{position:relative;width:100%;aspect-ratio:640/436;min-height:780px}
+.pane{position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;overflow:auto;display:flex;flex-direction:column}
+.pane h3{margin:0 0 6px;font-size:12.5px;font-weight:600;color:#333}
+.pane h3 small{color:var(--muted);font-weight:400}
+.lever{display:grid;grid-template-columns:1fr 70px;gap:4px 8px;align-items:center;padding:4px 0;border-top:1px dashed #eee}
+.lever:first-of-type{border-top:0}
+.lever label{font-size:12px;grid-column:1/3;color:#333}
+.lever label b{color:var(--muted);font-weight:400;font-size:11px;margin-left:4px}
+.lever input[type=range]{width:100%;margin:0}
+.lever input[type=number]{width:70px;font-size:12px;padding:2px 4px;border:1px solid var(--line);border-radius:3px;text-align:right}
+.lever .cur{grid-column:1/3;font-size:11px;color:var(--muted)}
+.sw{padding:6px 0;border-top:1px dashed #eee;font-size:12.5px}
+.sw .cap{margin-bottom:4px}
+.sw label{margin-right:12px;cursor:pointer}
+svg.chart{width:100%;flex:1;min-height:140px}
+.legend{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:11.5px;margin-top:4px}
+.legend span i{display:inline-block;width:10px;height:3px;margin-right:5px;vertical-align:middle}
+.legend .v,.legend .r{color:var(--muted);font-variant-numeric:tabular-nums}
+.log{margin-top:14px;font-size:12px;color:var(--muted)}
+.log table{border-collapse:collapse}
+.log td{padding:2px 10px 2px 0;font-variant-numeric:tabular-nums}
+.changed{color:var(--acc2)}
+.lever .sb{grid-column:1/3;display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)}
+.lever .sb button{font-size:11px;padding:1px 6px;border:1px solid var(--line);background:#fafaf7;border-radius:3px;cursor:pointer}
+.lever .sb button.on{border-color:var(--acc);color:var(--acc);font-weight:600}
+.sched{grid-column:1/3;background:#f6f8fc;border:1px solid #d6dff0;border-radius:5px;padding:6px 8px;font-size:12px;margin:2px 0 4px}
+.sched table{border-collapse:collapse;margin:4px 0}
+.sched td{padding:1px 3px}
+.sched input[type=number]{width:64px;font-size:12px;padding:1px 3px;border:1px solid var(--line);border-radius:3px}
+.sched button{font-size:11.5px;padding:2px 8px;border:1px solid var(--line);background:#fff;border-radius:3px;cursor:pointer;margin-right:4px}
+.sched button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+.sched svg{width:100%;height:70px;background:#fff;border:1px solid #e3e7ef;border-radius:3px;margin-top:4px}
+.sched .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:3px 0}
+.slist{margin-top:14px;font-size:12.5px}
+.slist .it{display:flex;gap:10px;align-items:center;padding:4px 0;border-top:1px dashed #ddd}
+.slist svg{width:160px;height:40px;background:#fff;border:1px solid #e3e7ef;border-radius:3px}
+.slist button{font-size:11px;padding:1px 6px;border:1px solid var(--line);background:#fafaf7;border-radius:3px;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>Сложная народнохозяйственная модель</h1>
+  <span class="t" id="time">t = 0.00 г.</span>
+  <button data-run="0.1">▶ 0.1 года</button>
+  <button data-run="0.5">▶ 0.5 года</button>
+  <button data-run="1">▶ 1 год</button>
+  <button data-run="5">▶ 5 лет</button>
+  <button class="danger" id="reset">⟲ сброс</button>
+  <label style="font-size:12px;color:#ccc;margin-left:6px" title="растянуть оси до шкал оригинального модели (например, 0–5 для индексов)"><input type="checkbox" id="autoscale"> шкалы оригинала</label>
+  <select id="variant" title="эталон — файл как есть; patched — с правками (см. список под экраном)" style="margin-left:8px;font-size:12px;background:#3a4150;color:#fff;border:0;border-radius:4px;padding:5px 6px"><option value="patched">вариант: patched</option><option value="reference">вариант: эталон</option></select>
+  <span class="status" id="status"></span>
+</header>
+<nav id="nav"></nav>
+<main>
+  <h2 id="title">…</h2>
+  <div class="board" id="board"></div>
+  <div class="slist" id="slist"></div>
+  <div class="slist" id="plist"></div>
+  <div class="log" id="log"></div>
+</main>
+<script>
+const COLORS=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)','var(--c7)','var(--c8)'];
+let screens=[], current=null, screenData=null, state={t:0,events:[]};
+const $=s=>document.querySelector(s);
+const fmt=(x,d=3)=>x==null?'—':(Math.abs(x)>=1000?x.toFixed(0):Math.abs(x)>=100?x.toFixed(1):Math.abs(x)>=10?x.toFixed(2):x.toFixed(d));
+async function api(path,body){const r=await fetch(path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:undefined);const j=await r.json();if(j.error)throw new Error(j.error);return j;}
+function setStatus(s){$('#status').textContent=s;}
+async function loadScreens(){screens=await api('/api/screens');const nav=$('#nav');nav.innerHTML='';let g=null;for(const s of screens){if(s.group!==g){g=s.group;const d=document.createElement('div');d.className='grp';d.textContent=g;nav.appendChild(d);}const a=document.createElement('a');a.href='#'+s.id;a.dataset.id=s.id;a.innerHTML=`<span class="n">${s.id}</span>${s.title}${s.has_panel?'<span class="p">⚙</span>':''}`;nav.appendChild(a);}}
+async function showScreen(id){current=id;document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('active',+a.dataset.id===id));await refreshState();screenData=await api('/api/screen/'+id);$('#title').textContent=`${id}. ${screenData.title}`;renderBoard();await refreshCharts();}
+function renderBoard(){const board=$('#board');board.innerHTML='';for(const p of screenData.panes){const f=p.frame;const d=document.createElement('div');d.className='pane';d.style.left=(p.box.x*100)+'%';d.style.top=(p.box.y*100)+'%';d.style.width=(p.box.w*100)+'%';d.style.height=(p.box.h*100)+'%';d.dataset.frame=f.id;
+ const h=document.createElement('h3');h.innerHTML=(f.title||(f.kind===13?'Режимы':''))+` <small>#${f.id}</small>`;d.appendChild(h);
+ if(f.kind===2||f.kind===11)renderPanel(d,f);else if(f.kind===13)renderSwitch(d,f);else if(f.kind===3)renderHist(d,f);else renderChart(d,f);board.appendChild(d);}}
+function renderPanel(d,f){for(const it of f.items){const lo=it.vmin??0,hi=it.vmax??Math.max(1,Math.abs(it.value)*2);const step=niceStep(lo,hi);const row=document.createElement('div');row.className='lever';const sc=it.schedule;row.innerHTML=`<label class="${it.default!=null&&Math.abs(it.value-it.default)>1e-9?'changed':''}">${it.label||it.name}<b>#${it.block}</b></label><input type="range" min="${lo}" max="${hi}" step="${step}" value="${it.value}"><input type="number" step="${step}" value="${+it.value.toFixed(6)}"><div class="sb"><button class="${sc?'on':''}" title="график изменения во времени">📈 график</button><span>${sc?`${sc.points.length} т., ${sc.mode==='linear'?'плавно':'ступенчато'}`:(it.name||'')}</span></div>`;const rng=row.children[1],num=row.children[2],sbtn=row.querySelector('.sb button');
+ rng.oninput=()=>{num.value=rng.value;};rng.onchange=()=>setLever(it,+rng.value,row);num.onchange=()=>{rng.value=num.value;setLever(it,+num.value,row);};sbtn.onclick=()=>toggleSched(row,it,lo,hi,step);d.appendChild(row);}}
+function toggleSched(row,it,lo,hi,step){const ex=row.querySelector('.sched');if(ex){ex.remove();return;}const ed=document.createElement('div');ed.className='sched';const sc=it.schedule;let pts=sc?sc.points.map(p=>[p[0],p[1]]):[[+state.t.toFixed(2),it.value]];let mode=sc?sc.mode:'step';
+ const render=()=>{pts.sort((a,b)=>a[0]-b[0]);ed.innerHTML=`<div class="row"><b>График #${it.block}</b> <label><input type="radio" name="m${it.block}" value="step" ${mode==='step'?'checked':''}> ступенчато</label><label><input type="radio" name="m${it.block}" value="linear" ${mode==='linear'?'checked':''}> плавно</label></div>
+ <table><tr><td style="color:var(--muted)">t, лет</td><td style="color:var(--muted)">значение</td><td></td></tr>${pts.map((p,i)=>`<tr><td><input type="number" step="0.01" min="0" value="${p[0]}" data-i="${i}" data-k="0"></td><td><input type="number" step="${step}" value="${+p[1].toFixed(6)}" data-i="${i}" data-k="1"></td><td><button data-del="${i}" title="удалить">✕</button></td></tr>`).join('')}</table>
+ <div class="row"><button data-add>+ точка</button><span style="color:var(--muted)">плавно к</span><input type="number" step="${step}" value="${+it.value.toFixed(6)}" data-tv> <span style="color:var(--muted)">за</span><input type="number" step="0.25" min="0.01" value="1" data-ty style="width:52px"> <span style="color:var(--muted)">лет с t=${state.t.toFixed(2)}</span><button data-ramp>задать</button></div>
+ <svg></svg><div class="row"><button class="pri" data-apply>применить</button>${sc?'<button data-clear>снять график</button>':''}<button data-close>закрыть</button><span style="color:var(--muted)">до первой точки рычаг не меняется, после последней держится её значение</span></div>`;
+ ed.querySelectorAll('input[type=radio]').forEach(r=>r.onchange=()=>{mode=r.value;draw();});ed.querySelectorAll('td input').forEach(inp=>inp.onchange=()=>{pts[+inp.dataset.i][+inp.dataset.k]=+inp.value;render();});ed.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{pts.splice(+b.dataset.del,1);if(!pts.length)pts=[[+state.t.toFixed(2),it.value]];render();});
+ ed.querySelector('[data-add]').onclick=()=>{const last=pts[pts.length-1];pts.push([+(last[0]+1).toFixed(2),last[1]]);render();};
+ ed.querySelector('[data-ramp]').onclick=()=>{const tv=+ed.querySelector('[data-tv]').value,ty=+ed.querySelector('[data-ty]').value;const t0=+state.t.toFixed(2);pts=[[t0,it.value],[+(t0+ty).toFixed(2),tv]];mode='linear';render();};
+ ed.querySelector('[data-apply]').onclick=async()=>{try{await api('/api/schedule',{block:it.block,points:pts,mode,label:it.label});setStatus(`график #${it.block} задан (${pts.length} т.)`);await showScreen(current);}catch(e){setStatus('ошибка: '+e.message);}};
+ const cl=ed.querySelector('[data-clear]');if(cl)cl.onclick=async()=>{await api('/api/schedule',{block:it.block,points:[],label:it.label});setStatus(`график #${it.block} снят`);await showScreen(current);};
+ ed.querySelector('[data-close]').onclick=()=>ed.remove();draw();};
+ const draw=()=>{const svg=ed.querySelector('svg');if(!svg)return;schedPreview(svg,pts,mode,lo,hi,state.t);};row.appendChild(ed);render();}
+function schedPreview(svg,pts,mode,lo,hi,tnow){const W=svg.clientWidth||300,H=svg.clientHeight||70,ml=34,mr=6,mt=4,mb=12;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);const tmax=Math.max(5,Math.ceil(Math.max(tnow,...pts.map(p=>p[0]))+1));let ylo=Math.min(lo,...pts.map(p=>p[1])),yhi=Math.max(hi,...pts.map(p=>p[1]));if(yhi===ylo)yhi=ylo+1;const X=x=>ml+x/tmax*(W-ml-mr),Y=y=>mt+(1-(y-ylo)/(yhi-ylo))*(H-mt-mb);let g=`<line x1="${X(tnow)}" x2="${X(tnow)}" y1="${mt}" y2="${H-mb}" stroke="#c98a00" stroke-dasharray="3 2"/>`;{const xs=xStep(tmax);for(let k=0;k<=tmax;k+=xs)g+=`<text x="${X(k)}" y="${H-2}" font-size="9" text-anchor="middle" fill="#777">${k}</text>`;}g+=`<text x="${ml-3}" y="${Y(yhi)+8}" font-size="9" text-anchor="end" fill="#777">${fmt(yhi,2)}</text><text x="${ml-3}" y="${Y(ylo)}" font-size="9" text-anchor="end" fill="#777">${fmt(ylo,2)}</text>`;
+ const P=[...pts].sort((a,b)=>a[0]-b[0]);let d='';P.forEach((p,i)=>{if(i===0)d+=`M${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`;else{const q=P[i-1];d+=mode==='step'?`L${X(p[0]).toFixed(1)} ${Y(q[1]).toFixed(1)}L${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`:`L${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`;}});const last=P[P.length-1];d+=`L${X(tmax).toFixed(1)} ${Y(last[1]).toFixed(1)}`;g+=`<path d="${d}" fill="none" stroke="var(--acc)" stroke-width="1.6"/>`;P.forEach(p=>g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="2.5" fill="var(--acc)"/>`);svg.innerHTML=g;}
+async function refreshSchedules(){const L=await api('/api/schedules');const el=$('#slist');if(!L.length){el.innerHTML='';return;}el.innerHTML=`<b>Графики рычагов (${L.length})</b> <button id="sclear">снять все</button>`+L.map(s=>`<div class="it"><svg data-b="${s.block}"></svg><div><b>#${s.block}</b> ${s.label} <span style="color:var(--muted)">— ${s.mode==='linear'?'плавно':'ступенчато'}, точки: ${s.points.map(p=>`(${p[0]}; ${fmt(p[1])})`).join(' ')} · сейчас ${fmt(s.current)}</span></div><button data-b="${s.block}">снять</button></div>`).join('');
+ L.forEach(s=>{const svg=el.querySelector(`svg[data-b="${s.block}"]`);const vs=s.points.map(p=>p[1]);schedPreview(svg,s.points,s.mode,Math.min(...vs),Math.max(...vs),state.t);});el.querySelectorAll('button[data-b]').forEach(b=>b.onclick=async()=>{await api('/api/schedule',{block:+b.dataset.b,points:[]});await showScreen(current);});
+ const c=$('#sclear');if(c)c.onclick=async()=>{if(!confirm('Снять все графики рычагов?'))return;await api('/api/schedules/clear',{});await showScreen(current);};}
+function niceStep(lo,hi){const r=(hi-lo)/200;const p=Math.pow(10,Math.floor(Math.log10(r||1)));const m=r/p;return (m<1.5?1:m<3.5?2:m<7.5?5:10)*p;}
+async function setLever(it,val,row){try{const r=await api('/api/lever',{block:it.block,value:val,label:it.label});row.querySelector('label').classList.toggle('changed',it.default!=null&&Math.abs(r.new-it.default)>1e-9);setStatus(`#${it.block} ${it.label}: ${fmt(r.old)} → ${fmt(r.new)} при t=${r.t.toFixed(2)}`);await refreshState();}catch(e){setStatus('ошибка: '+e.message);}}
+function renderSwitch(d,f){for(const s of f.switches){const w=document.createElement('div');w.className='sw';const nm='sw'+f.id+'_'+s.a;w.innerHTML=`<div class="cap">${s.caption} <b style="color:var(--muted);font-weight:400;font-size:11px">#${s.a}/#${s.b}</b></div><label><input type="radio" name="${nm}" ${s.state_a?'checked':''}> ${f.options[0]}</label><label><input type="radio" name="${nm}" ${s.state_a?'':'checked'}> ${f.options[1]}</label>`;const [ra,rb]=w.querySelectorAll('input');ra.onchange=()=>doSwitch(s,true,f);rb.onchange=()=>doSwitch(s,false,f);d.appendChild(w);}}
+async function doSwitch(s,a,f){try{await api('/api/switch',{a:s.a,b:s.b,choose_a:a,label:s.caption});setStatus(`${s.caption}: ${a?f.options[0]:f.options[1]}`);await refreshState();}catch(e){setStatus('ошибка: '+e.message);}}
+function renderChart(d,f){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','chart');svg.dataset.blocks=f.items.map(i=>i.block).join(',');d.appendChild(svg);}
+function renderHist(d,f){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','chart');svg.dataset.hist=f.items.map(i=>i.block).join(',');d.appendChild(svg);const lg=document.createElement('div');lg.className='legend';lg.textContent=`${f.items.length} возрастных групп, по оси x — ${f.xlabel||'возраст'}`;d.appendChild(lg);}
+function niceTicks(lo,hi,n){const raw=(hi-lo)/n;const p=Math.pow(10,Math.floor(Math.log10(raw||1)));const m=raw/p;const step=(m<1.5?1:m<3?2:m<7?5:10)*p;const out=[];for(let v=Math.ceil(lo/step-1e-9)*step;v<=hi+1e-9;v+=step)out.push(+v.toFixed(10));return out;}
+function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function fmtTick(v,step){if(Math.abs(v)<1e-12)return '0';const d=Math.max(0,-Math.floor(Math.log10(step))+(String(step/Math.pow(10,Math.floor(Math.log10(step))))[0]==='2'&&/\.5$/.test(String(step/Math.pow(10,Math.floor(Math.log10(step)))))?1:0));return Math.abs(v)>=1e6?v.toExponential(1):v.toFixed(Math.min(d,6));}
+function xStep(xmax){for(const st of [1,2,5,10,20,50,100])if(xmax/st<=10)return st;return 200;}
+function drawLines(svg,f,t,series){const W=svg.clientWidth||400,H=svg.clientHeight||150;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);const orig=$('#autoscale').checked;const xmax=Math.max(5,Math.ceil(t[t.length-1]||0));
+ // диапазон каждой серии по данным (+ шкала оригинала, если включена); минимальный размах 4% от уровня, чтобы шум не выглядел обвалом
+ const R=f.items.map(it=>{const s=series[it.block]||[];let lo=Infinity,hi=-Infinity;for(const v of s){if(v==null)continue;if(v<lo)lo=v;if(v>hi)hi=v;}if(!isFinite(lo)){lo=0;hi=1;}if(orig){if(it.vmin!=null)lo=Math.min(lo,it.vmin);if(it.vmax!=null)hi=Math.max(hi,it.vmax);}const mid=(lo+hi)/2,ms=Math.max(Math.abs(mid)*0.04,0.01);if(hi-lo<ms){lo=mid-ms/2;hi=mid+ms/2;}return {lo,hi,mid:Math.abs(mid),k:f.items.indexOf(it)};});
+ // группировка по порядку величины: сортируем по |уровню|, режем по разрывам > 8 раз (до 3 групп); серии ≈0 — в младшую группу
+ const ord=[...R].sort((a,b)=>a.mid-b.mid);const nz=ord.filter(r=>r.mid>1e-6),z=ord.filter(r=>r.mid<=1e-6);const gaps=[];for(let i=1;i<nz.length;i++){const ratio=nz[i].mid/Math.max(nz[i-1].mid,1e-9);if(ratio>8)gaps.push({i,ratio});}gaps.sort((a,b)=>b.ratio-a.ratio);const cuts=gaps.slice(0,2).map(g=>g.i).sort((a,b)=>a-b);
+ let parts=[];let prev=0;for(const c of cuts){parts.push(nz.slice(prev,c));prev=c;}parts.push(nz.slice(prev));if(z.length){if(parts.length&&parts[0].length&&parts.length<3&&nz.length&&nz[0].mid>1e-3)parts.unshift(z);else parts[0]=z.concat(parts[0]||[]);}parts=parts.filter(p=>p.length);const groups=parts.reverse().map(p=>p.map(r=>r.k));
+ const ml=52,mr=8,mt=4,mb=16,gap=8,n=groups.length,gh=(H-mt-mb-gap*(n-1))/n;let g='';const X=x=>ml+(x/xmax)*(W-ml-mr);
+ groups.forEach((ks,gi2)=>{const top=mt+gi2*(gh+gap);let lo=Math.min(...ks.map(k=>R[k].lo)),hi=Math.max(...ks.map(k=>R[k].hi));const pad=(hi-lo)*0.06;lo-=pad;hi+=pad;const Y=y=>top+(1-(y-lo)/(hi-lo))*gh;
+  g+=`<rect x="${ml}" y="${top}" width="${W-ml-mr}" height="${gh}" fill="#fff" stroke="#e4e4de"/>`;
+  const xs=xStep(xmax);for(let k=0;k<=xmax;k+=xs)g+=`<line x1="${X(k)}" x2="${X(k)}" y1="${top}" y2="${top+gh}" stroke="#f0f0ea"/>`;
+  const tk=niceTicks(lo,hi,gh>90?4:2),tst=tk.length>1?tk[1]-tk[0]:(hi-lo);for(const v of tk)g+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eeeee8"/><text x="${ml-5}" y="${Y(v)+3.5}" font-size="10" text-anchor="end" fill="#666">${fmtTick(v,tst)}</text>`;
+  ks.forEach(k=>{const it=f.items[k],s=series[it.block];if(!s)return;let d='',pen=false;for(let i=0;i<s.length;i++){if(s[i]==null){pen=false;continue;}d+=(pen?'L':'M')+X(t[i]).toFixed(1)+' '+Y(s[i]).toFixed(1);pen=true;}g+=`<path d="${d}" fill="none" stroke="${COLORS[k%8]}" stroke-width="1.7"/>`;});
+  // подписи серий с текущими значениями — внутри своей части графика, построчно
+  let lx=ml+6,ly=top+11;ks.forEach(k=>{const it=f.items[k],s=series[it.block]||[];let nm=it.label.replace(/^!/,'');const maxc=Math.max(8,Math.floor((W-ml-mr)/6.5)-8);if(nm.length>maxc)nm=nm.slice(0,maxc-1)+'…';const txt=`${nm} ${fmt(s.length?s[s.length-1]:null)}`;const w=txt.length*6.2+10;if(lx+w>W-mr&&lx>ml+6){lx=ml+6;ly+=12;}g+=`<text x="${lx}" y="${ly}" font-size="10.5" font-weight="600" fill="${COLORS[k%8]}" stroke="#fff" stroke-width="3" paint-order="stroke">${esc(txt)}</text>`;lx+=w;});
+ });
+ {const xs=xStep(xmax);for(let k=0;k<=xmax;k+=xs)g+=`<text x="${X(k)}" y="${H-3}" font-size="10" text-anchor="middle" fill="#666">${k}</text>`;}
+ svg.innerHTML=g;}
+function drawHist(svg,blocks,series){const W=svg.clientWidth||400,H=svg.clientHeight||150,ml=40,mr=6,mt=6,mb=16;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);const vals=blocks.map(b=>{const s=series[b]||[];return s.length?s[s.length-1]:null;});const hi=Math.max(1e-9,...vals.filter(v=>v!=null));const bw=(W-ml-mr)/blocks.length;let g='';
+ for(let k=0;k<=4;k++){const y=hi*k/4,yy=mt+(1-k/4)*(H-mt-mb);g+=`<line x1="${ml}" x2="${W-mr}" y1="${yy}" y2="${yy}" stroke="#eee"/><text x="${ml-4}" y="${yy+3}" font-size="10" text-anchor="end" fill="#777">${fmt(y,2)}</text>`;}
+ vals.forEach((v,i)=>{if(v==null)return;const h=(v/hi)*(H-mt-mb);g+=`<rect x="${ml+i*bw}" y="${H-mb-h}" width="${Math.max(1,bw-1)}" height="${h}" fill="var(--c1)"/>`;if(i%10===0)g+=`<text x="${ml+i*bw}" y="${H-4}" font-size="10" fill="#777">${i}</text>`;});svg.innerHTML=g;}
+async function refreshCharts(){if(!screenData)return;const blocks=new Set();document.querySelectorAll('svg.chart').forEach(s=>{(s.dataset.blocks||s.dataset.hist||'').split(',').filter(Boolean).forEach(b=>blocks.add(+b));});if(!blocks.size)return;const r=await api('/api/series?blocks='+[...blocks].join(','));
+ for(const p of screenData.panes){const f=p.frame;const pane=document.querySelector(`.pane[data-frame="${f.id}"]`);if(!pane)continue;const svg=pane.querySelector('svg.chart');if(!svg)continue;if(f.kind===3)drawHist(svg,f.items.map(i=>i.block),r.series);else drawLines(svg,f,r.t,r.series);}}
+async function refreshState(){state=await api('/api/state');$('#time').textContent=`t = ${state.t.toFixed(2)} г.`+(state.n_schedules?` · графиков ${state.n_schedules}`:'')+(state.variant==='patched'?' · patched':'');$('#variant').value=state.variant;
+ $('#plist').innerHTML=state.variant==='patched'?`<b>Правки patched-варианта</b>`+state.patches.map(p=>`<div class="it" style="display:block"><b>${p.title}</b> <span style="color:var(--muted)">— ${p.why}</span></div>`).join('')+`<div style="color:var(--muted);margin-top:4px">${state.patch_log.length} изменённых блоков</div>`:'';await refreshSchedules();const ev=state.events.slice(-12).reverse();$('#log').innerHTML=ev.length?'<b>Изменения рычагов</b><table>'+ev.map(e=>`<tr><td>t=${e.t.toFixed(2)}</td><td>#${e.block}</td><td>${e.label}</td><td>${fmt(e.old)} → ${fmt(e.new)}</td></tr>`).join('')+'</table>':'';}
+async function run(y){setStatus(`счёт ${y} г. …`);document.querySelectorAll('header button').forEach(b=>b.disabled=true);try{const r=await api('/api/run',{years:y});setStatus(`посчитано за ${r.elapsed.toFixed(2)} с`);await showScreen(current);}catch(e){setStatus('ошибка: '+e.message);}finally{document.querySelectorAll('header button').forEach(b=>b.disabled=false);}}
+document.querySelectorAll('[data-run]').forEach(b=>b.onclick=()=>run(+b.dataset.run));
+$('#reset').onclick=async()=>{if(!confirm('Сбросить модель в исходное состояние? Графики рычагов сохранятся и сработают заново.'))return;await api('/api/reset',{keep_schedules:true});setStatus('сброшено');await showScreen(current);};
+window.addEventListener('hashchange',()=>showScreen(+location.hash.slice(1)||1));
+window.addEventListener('resize',()=>refreshCharts());
+$('#autoscale').onchange=()=>refreshCharts();
+$('#variant').onchange=async()=>{const v=$('#variant').value;if(!confirm(`Переключить на вариант «${v==='patched'?'patched (с правками)':'эталон'}»? Модель будет сброшена в исходное состояние, графики рычагов сохранятся.`)){$('#variant').value=state.variant;return;}await api('/api/variant',{variant:v});setStatus('вариант: '+v);await showScreen(current);};
+(async()=>{await loadScreens();await refreshState();await showScreen(+location.hash.slice(1)||1);})();
+</script>
+</body>
+</html>
