@@ -18,6 +18,7 @@ import json, sys, os, warnings
 warnings.filterwarnings('ignore')
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from sim.session import Session
+from sim.patches import SOCIAL_NOMINAL, T_INDEX
 
 MDN = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'SNHM.MDN')
 SEC = {1: 'сырьё (горнодобыча)', 2: 'машиностроение', 3: 'строительство', 4: 'сельское хозяйство',
@@ -119,10 +120,18 @@ def deflator(s: Session) -> float:
     return s.value(14004)
 
 
+def index_ratio(s: Session) -> float:
+    """Реальная ценность бюджетных выплат (#14020): номинальные планы #114–#117 индексируются с лагом."""
+    return s.value(14020)
+
+
 def apply_expenditures(s: Session, total: float) -> None:
+    """total — расходы в реальном выражении (ценах модели); планы социальных выплат задаются в номинале
+    так, чтобы их реальная величина при текущей инфляции равнялась целевой структуре."""
     tot0 = sum(EXP_ITEMS.values())
+    r = index_ratio(s)
     for k, v in EXP_ITEMS.items():
-        s.set_lever(k, total * v / tot0)
+        s.set_lever(k, total * v / tot0 / (r if k in SOCIAL_NOMINAL else 1.0))
     s.set_lever(90, total)
     s.set_lever(159, total)
 
@@ -201,6 +210,8 @@ def calibrate(verbose: bool = True, years_warm: float = 3.0, iters: int = 6) -> 
         gdp = s.value(155)
         set_nontax(s, gdp)
         apply_expenditures(s, gdp * EXP_TARGET / 100)
+        cur41 = contributions(s)[41]      # трансферт Нацфонда/таможня уходит при перестройке рынка труда — подправить #122
+        s.set_lever(122, s.lever(122) * min(max(TARGET[41] / max(cur41, 1e-6), 0.5), 2.0) ** 0.7)
         u = unemployment(s)
         if abs(u - UNEMP_TARGET) < 0.15:
             break

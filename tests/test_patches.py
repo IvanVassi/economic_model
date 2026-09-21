@@ -11,7 +11,8 @@ def test_reference_untouched(blocks, settled):
     assert by[1811].srcs == [1012] and by[15411].srcs == [0x7FFFFFFF] and by[1858].hi is None
     pb = {b.idx: b for b in patched}
     assert pb[1811].srcs == [1029] and pb[15411].srcs == [231] and pb[1858].hi == CAP_QUALITY
-    assert len(log) == 15 + len(INFLATION_BLOCKS)
+    assert len(log) == 15 + len(INFLATION_BLOCKS) + 1
+    assert by[116].srcs == [0x7FFFFFFF] and pb[116].srcs == [14020]
     assert all(i not in by for i in INFLATION_BLOCKS) and all(i in pb for i in INFLATION_BLOCKS)
 
 
@@ -60,4 +61,5 @@ def test_inflation_overlay():
     assert abs(pi - 5.0 / (1 - INDEXATION)) < 0.5, pi                   # 10 % при ζ = 0.5
     assert S.value(14004) > 2.0                                         # дефлятор вырос
     assert S.value(14017) == pytest.approx(S.value(155) * S.value(14004), rel=1e-9)
-    assert abs(S.value(155) / gdp_real - 1) < 0.03                      # реальный ВВП от инфляции не зависит
+    assert S.value(14020) == pytest.approx(1 / (1 + 0.10 * 0.5), rel=0.02)   # выплаты обесценены до индексации
+    assert 0.9 < S.value(155) / gdp_real < 1.0                          # обратное влияние: спрос групп на выплатах ниже
