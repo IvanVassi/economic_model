@@ -30,3 +30,22 @@ def test_vat_hike_raises_vat_and_lowers_gdp(calibrated):
     assert a.value(34) > base.value(34) * 1.15          # сбор внутреннего НДС растёт
     assert a.value(155) < base.value(155)               # ВВП ниже базы
     assert a.value(210) > base.value(210)               # розничные цены выше
+
+
+def test_calibration_inflation_and_scenario_path(calibrated):
+    """Сложившаяся инфляция 2025 ≈ 12.3 % (инерционный процесс); в сценарии фон снижается к 5 % — инфляция падает,
+    а повышение НДС даёт дополнительную инфляцию с эффектом второго круга."""
+    assert abs(kz.inflation(calibrated) - kz.INFL_TARGET) < 1.0
+    base = copy.deepcopy(calibrated); a = copy.deepcopy(calibrated)
+    for s in (base, a):
+        kz.background_path(s, kz.INFL_TARGET, kz.INFL_LONGRUN)
+    a.set_lever(14, 16); a.set_lever(19, 16)
+    infl_b, infl_a = [], []
+    for _ in range(5):
+        base.run(1.0); a.run(1.0)
+        infl_b.append(kz.inflation(base)); infl_a.append(kz.inflation(a))
+    assert infl_b[0] > infl_b[-1] and 4.5 < infl_b[-1] < 7.0          # снижение к цели
+    assert infl_a[0] > infl_b[0] + 3.0                                 # НДС: заметный скачок в первый год
+    prim = a.value(14008) / base.value(14008) - 1                     # первичный сдвиг цен модели
+    full = a.value(14018) / base.value(14018) - 1                     # с учётом второго круга
+    assert full > 1.5 * prim, (prim, full)

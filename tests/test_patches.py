@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from sim.patches import apply_patches, CAP_QUALITY, GROUP_BASES
+from sim.patches import apply_patches, CAP_QUALITY, GROUP_BASES, INFLATION_BLOCKS, INDEXATION
 from sim.session import Session
 from tests.conftest import MDN
 
@@ -11,7 +11,8 @@ def test_reference_untouched(blocks, settled):
     assert by[1811].srcs == [1012] and by[15411].srcs == [0x7FFFFFFF] and by[1858].hi is None
     pb = {b.idx: b for b in patched}
     assert pb[1811].srcs == [1029] and pb[15411].srcs == [231] and pb[1858].hi == CAP_QUALITY
-    assert len(log) == 15
+    assert len(log) == 15 + len(INFLATION_BLOCKS)
+    assert all(i not in by for i in INFLATION_BLOCKS) and all(i in pb for i in INFLATION_BLOCKS)
 
 
 def test_patched_equals_reference_at_start():
@@ -19,6 +20,8 @@ def test_patched_equals_reference_at_start():
     S = Session(MDN, variant='patched')
     d = np.abs(np.asarray(S.vl) - S.v_ref)
     d[~np.isfinite(d)] = 0
+    d[INFLATION_BLOCKS] = 0                                  # новых блоков в эталоне нет (D = 1, номинальный ВВП = #155)
+    assert S.value(14004) == 1.0 and S.value(14017) == pytest.approx(S.value(155))
     assert d.max() < 1e-6, int(np.argmax(d))
 
 
@@ -42,3 +45,19 @@ def test_patched_baseline_quasistatic():
     assert abs(S.value(380) - 0.604) < 0.05 and abs(S.value(155) / 11330 - 1) < 0.03
     S.set_variant('reference')
     assert S.variant == 'reference' and S.t == 0.0
+
+
+def test_inflation_overlay():
+    """Правка inflation: без фона дефлятор ≈ 1 и реальная динамика не меняется; при фоне p установившаяся
+    инфляция = p/(1−ζ); номинальный ВВП = реальный · дефлятор."""
+    S = Session(MDN, variant='patched')
+    S.run(3.0)
+    gdp_real, d = S.value(155), S.value(14004)
+    assert abs(d - 1) < 0.02 and abs(S.value(14008) - 1) < 0.05        # цены модели почти постоянны
+    S.set_lever(14009, 5.0)                                             # фон 5 % в год
+    S.run(12.0)
+    pi = 100 * S.value(14016)
+    assert abs(pi - 5.0 / (1 - INDEXATION)) < 0.5, pi                   # 10 % при ζ = 0.5
+    assert S.value(14004) > 2.0                                         # дефлятор вырос
+    assert S.value(14017) == pytest.approx(S.value(155) * S.value(14004), rel=1e-9)
+    assert abs(S.value(155) / gdp_real - 1) < 0.03                      # реальный ВВП от инфляции не зависит
