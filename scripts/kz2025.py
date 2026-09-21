@@ -30,7 +30,18 @@ SEC_SHORT = {1: 'сырьё', 2: 'машиностр', 3: 'строит', 4: 'с
 KZ = dict(gdp_trln=159.6, gdp_usd_bln=306.0, rate_avg=521.0, inflation=12.3, unemployment=4.6,
           population_mln=20.48, exports_goods_usd=71.1, exports_services_usd=9.5, imports_goods_usd=57.7,
           vat_total=6.11, vat_import=2.9, cit_rb=4.53, cit_nf=2.5, pit=2.85, social_tax=1.6, excise_met_rent=3.0,
-          property=0.9, nf_transfer=5.25, customs=2.32, nontax=0.82, expenditures=33.7, deficit=4.4)
+          property=0.9, nf_transfer=5.25, customs=2.32, nontax=0.82, expenditures=33.7, deficit=4.4,
+          # рынок труда и структура населения, млн человек (2025)
+          labour_force=9.8, employed=9.35, unemployed=0.45, pensioners=2.4, public_employees=1.7, military=0.3, self_employed=2.1,
+          # фоновая инфляция без реформы, % в год: факт 2025 и условная траектория снижения к цели НБК 5 %
+          inflation_path={2025: 12.3, 2026: 9.5, 2027: 7.5, 2028: 6.0, 2029: 5.5, 2030: 5.0})
+
+# Демография и рынок труда. Трудовые ресурсы секторов (k012) — уставки; их общая сумма задаёт масштаб «человек»:
+# 1 ед. = labour_force / Σk012 млн чел. Безработица подгоняется масштабированием k012 (структура по секторам сохраняется).
+# Численности внепроизводственных групп: #15111 бюджетники, #15211 военные (константы), #15311 пенсионеры (множитель к #15400 = 61.5).
+# Демографический блок (#17001–#17699) в файле односторонний: экономика влияет на него, обратно — нет; #17670 «всего населения»
+# только отображается, поэтому его множитель ставится так, чтобы показывать население Казахстана в тех же единицах.
+UNEMP_TARGET = KZ['unemployment']
 
 # Целевой вклад компонент в доходы бюджета #42, % ВВП (после коэффициентов 0.8 и 0.8907).
 # #42 = 0.8907·(0.8·(#33+#34+#35+#36) + #40 + #41 + #60 + #56)
@@ -108,6 +119,24 @@ def apply_expenditures(s: Session, total: float) -> None:
     s.set_lever(159, total)
 
 
+def labour_units(s: Session) -> float:
+    """Сколько млн человек в одной единице численности модели."""
+    return KZ['labour_force'] / sum(s.lever(k * 1000 + 12) for k in SEC)
+
+
+def unemployment(s: Session) -> float:
+    return 100 * s.value(231) / sum(s.lever(k * 1000 + 12) for k in SEC)
+
+
+def apply_demography(s: Session) -> None:
+    """Численность групп и населения в единицах модели при текущем масштабе трудовых ресурсов."""
+    u = labour_units(s)
+    s.set_lever(15111, KZ['public_employees'] / u)
+    s.set_lever(15211, KZ['military'] / u)
+    s.set_lever(15311, KZ['pensioners'] / u / s.value(15400))         # #15311 = pa0 · #15400
+    s.set_lever(17670, s.lever(17670) * (KZ['population_mln'] / u) / max(s.value(17670), 1e-9))
+
+
 def calibrate(verbose: bool = True, years_warm: float = 3.0, iters: int = 6) -> Session:
     s = Session(MDN, variant='patched')
     apply_static(s)
@@ -130,6 +159,21 @@ def calibrate(verbose: bool = True, years_warm: float = 3.0, iters: int = 6) -> 
         s.set_lever(122, s.lever(122) * min(max(TARGET[41] / max(cur[41], 1e-6), 0.5), 2.0) ** 0.7)
         s.set_lever(56, gdp * TARGET[56] / 100 / COEF[56])
         apply_expenditures(s, gdp * EXP_TARGET / 100)
+    s.run(2.0)
+    apply_demography(s)
+    # безработица: подгонка масштаба трудовых ресурсов (2 итерации), доходы бюджета почти не меняются
+    for _ in range(3):
+        s.run(2.0)
+        gdp = s.value(155)
+        s.set_lever(56, gdp * TARGET[56] / 100 / COEF[56])
+        apply_expenditures(s, gdp * EXP_TARGET / 100)
+        u = unemployment(s)
+        if abs(u - UNEMP_TARGET) < 0.15:
+            break
+        f = (1 - u / 100) / (1 - UNEMP_TARGET / 100)
+        for k in SEC:
+            s.set_lever(k * 1000 + 12, s.lever(k * 1000 + 12) * f)
+        apply_demography(s)
     s.run(2.0)
     if verbose:
         gdp = s.value(155); cur = contributions(s)
